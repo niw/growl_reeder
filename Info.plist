@@ -28,9 +28,9 @@
 			<key>BundleIdentifier</key>
 			<string>com.reederapp.mac.Reeder</string>
 			<key>MaxBundleVersion</key>
-			<string>0</string>
+			<string>1000.02.01</string>
 			<key>MinBundleVersion</key>
-			<string>0</string>
+			<string>1000.02.01</string>
 		</dict>
 	</array>
 </dict>
