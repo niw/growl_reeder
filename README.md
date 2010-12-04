@@ -2,22 +2,24 @@ Growl Reeder
 ============
 
 This is a tiny plugin to enable Growl desktop notification in awesome [Reeder.app for Mac](http://reederapp.com/).
-I've tested this plugin with only current Reeder Version 1.0 Draft 1 which is beta version.
+I've tested this plugin with only current Reeder Version 1.0 Draft 2 which is beta version.
 
 Are you looking for the Reeder.app for Mac? You can grab the link from [their tweets](http://twitter.com/reederapp).
 
 How to use this?
 ----------------
 
+1.  Goto [my blog article](http://niw.at/articles/2010/12/05/growl-plugin-for-reeder-for-mac/) to gownload the binary of GrowlReeder.
+
 1.	Install [SIMBL](http://www.culater.net/software/SIMBL/SIMBL.php) prior to use this plugin,
 	if you didn't install it yet.
 
-2.	Open ``~/Library/Application Support/SIMBL/Plugins`` folder.
+1.	Open ``~/Library/Application Support/SIMBL/Plugins`` folder.
 	If it doesn't exists, create it.
 
-3.	Copy or symlink ``GrowlReeder.bundle`` into that folder.
+1.	Copy or symlink ``GrowlReeder.bundle`` into that folder.
 
-4.  Restart Reeder.app.
+1.  Restart Reeder.app.
 
 
 How to build this plugin?
