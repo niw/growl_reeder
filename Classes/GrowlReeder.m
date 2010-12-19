@@ -2,13 +2,22 @@
 #import <objc/runtime.h>
 
 #define NEW_ARTICLE_NOTIFICATION_NAME @"New Article"
+#define MAX_NOTIFICATIONS_AT_ONCE 5
 
 @implementation GrowlReeder
 + (void)load {
-	Class class = objc_getClass("ReaderFetchItems");
-	Method originalMethod = class_getInstanceMethod(class, @selector(item:));
-	Method hookMethod = class_getInstanceMethod(class, @selector(growl_reeder_item:));
-	method_exchangeImplementations(originalMethod, hookMethod);
+	{
+		Class class = objc_getClass("ReaderFetchItems");
+		Method originalMethod = class_getInstanceMethod(class, @selector(item:));
+		Method hookMethod = class_getInstanceMethod(class, @selector(growl_reeder_item:));
+		method_exchangeImplementations(originalMethod, hookMethod);
+	}
+	{
+		Class class = objc_getClass("ReederMacAppDelegate");
+		Method originalMethod = class_getInstanceMethod(class, @selector(readerDidSync:));
+		Method hookMethod = class_getInstanceMethod(class, @selector(growl_reeder_readerDidSync:));
+		method_exchangeImplementations(originalMethod, hookMethod);
+	}
 
 	[GrowlApplicationBridge setGrowlDelegate:[self sharedInstance]];
 
@@ -26,7 +35,16 @@
 	return sharedInstance;
 }
 
+- (id)init {
+	self = [super init];
+	if(self) {
+		items = [[NSMutableArray alloc] init];
+	}
+	return self;
+}
+
 - (void)dealloc {
+	[items release];
 	[super dealloc];
 }
 
@@ -57,7 +75,34 @@
 							   clickContext:nil];
 }
 
-- (void)growlReaderItem:(NSDictionary *)item {
+- (void)growlItems {
+	int i, count = [items count];
+	for(i = 0; i < count && i < MAX_NOTIFICATIONS_AT_ONCE; i++) {
+		NSDictionary *item = [items objectAtIndex:i];
+
+		NSDictionary *origin = [item valueForKey:@"origin"];
+		NSData *iconData = nil;
+		NSImage *icon = [self displayIconForFeedId:[origin valueForKey:@"streamId"]];
+		if(icon) {
+			iconData = [NSData dataWithData:[icon TIFFRepresentation]];
+		}
+
+		[self growl:[item valueForKey:@"title"] withTitle:[origin valueForKey:@"title"] withIconData:iconData];
+	}
+
+	int remains = count - i;
+	if(remains > 0) {
+		[self growl:[NSString stringWithFormat:@"And %d articles", remains] withTitle:@"Reeder" withIconData:nil];
+	}
+
+	[items removeAllObjects];
+}
+
+- (void)addReederItem:(NSDictionary *)item {
+	[items addObject:item];
+}
+
+- (void)fetchedReederItem:(NSDictionary *)item {
 	NSArray *categories = [item valueForKey:@"categories"];
 	BOOL read = NO;
 	for(id obj in categories) {
@@ -71,14 +116,7 @@
 	}
 
 	if(! read) {
-		NSDictionary *origin = [item valueForKey:@"origin"];
-		NSData *iconData = nil;
-		NSImage *icon = [self displayIconForFeedId:[origin valueForKey:@"streamId"]];
-		if(icon) {
-			iconData = [NSData dataWithData:[icon TIFFRepresentation]];
-		}
-
-		[self growl:[item valueForKey:@"title"] withTitle:[origin valueForKey:@"title"] withIconData:iconData];
+		[self addReederItem:item];
 	}
 }
 
@@ -104,7 +142,17 @@
 	NSLog(@"GrowlReeder: -growl_reeder_item:%@", item);
 #endif
 
-	[[GrowlReeder sharedInstance] growlReaderItem:item];
+	[[GrowlReeder sharedInstance] fetchedReederItem:item];
 	[self growl_reeder_item:item];
+}
+
+- (void)growl_reeder_readerDidSync:(NSNotification *)notification {
+#ifdef DEBUG
+	NSLog(@"GrowlReeder: -growl_reeder_readerDidSync:%@", notification);
+#endif
+	if([[notification name] isEqualToString:@"ReaderDidSync"]) {
+		[[GrowlReeder sharedInstance] growlItems];
+	}
+	[self growl_reeder_readerDidSync:notification];
 }
 @end
