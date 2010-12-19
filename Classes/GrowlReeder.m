@@ -2,7 +2,7 @@
 #import <objc/runtime.h>
 
 #define NEW_ARTICLE_NOTIFICATION_NAME @"New Article"
-#define MAX_NOTIFICATIONS_AT_ONCE 5
+#define MAX_NOTIFICATIONS_AT_ONCE 7
 
 void objc_exchangeInstanceMethodImplementations(const char* className, SEL originlSelector, SEL replacementSelector) {
 	Class class = objc_getClass(className);
@@ -110,7 +110,7 @@ void objc_exchangeInstanceMethodImplementations(const char* className, SEL origi
 	
 	int remains = count - i;
 	if(remains > 0) {
-		[self growl:[NSString stringWithFormat:@"And %d articles", remains] withTitle:@"Reeder" withIconData:nil];
+		[self growl:[NSString stringWithFormat:@"And %d unread articles", remains] withTitle:@"Reeder" withIconData:nil];
 	}
 	
 	[items removeAllObjects];
