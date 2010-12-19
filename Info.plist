@@ -7,7 +7,7 @@
 	<key>CFBundleExecutable</key>
 	<string>${EXECUTABLE_NAME}</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.yourcompany.${PRODUCT_NAME:rfc1034Identifier}</string>
+	<string>at.niw.${PRODUCT_NAME:rfc1034Identifier}</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -15,7 +15,7 @@
 	<key>CFBundlePackageType</key>
 	<string>BNDL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.1.0</string>
+	<string>0.1.1</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
@@ -28,7 +28,7 @@
 			<key>BundleIdentifier</key>
 			<string>com.reederapp.mac.Reeder</string>
 			<key>MaxBundleVersion</key>
-			<string>1000.02.02</string>
+			<string>1000.02.06</string>
 			<key>MinBundleVersion</key>
 			<string>1000.02.01</string>
 		</dict>
