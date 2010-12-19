@@ -4,20 +4,17 @@
 #define NEW_ARTICLE_NOTIFICATION_NAME @"New Article"
 #define MAX_NOTIFICATIONS_AT_ONCE 5
 
+void objc_exchangeInstanceMethodImplementations(const char* className, SEL originlSelector, SEL replacementSelector) {
+	Class class = objc_getClass(className);
+	Method originalMethod = class_getInstanceMethod(class, originlSelector);
+	Method replacementMethod = class_getInstanceMethod(class, replacementSelector);
+	method_exchangeImplementations(originalMethod, replacementMethod);
+}
+
 @implementation GrowlReeder
 + (void)load {
-	{
-		Class class = objc_getClass("ReaderFetchItems");
-		Method originalMethod = class_getInstanceMethod(class, @selector(item:));
-		Method hookMethod = class_getInstanceMethod(class, @selector(growl_reeder_item:));
-		method_exchangeImplementations(originalMethod, hookMethod);
-	}
-	{
-		Class class = objc_getClass("ReederMacAppDelegate");
-		Method originalMethod = class_getInstanceMethod(class, @selector(readerDidSync:));
-		Method hookMethod = class_getInstanceMethod(class, @selector(growl_reeder_readerDidSync:));
-		method_exchangeImplementations(originalMethod, hookMethod);
-	}
+	objc_exchangeInstanceMethodImplementations("ReaderFetchItems", @selector(item:), @selector(growl_reeder_item:));
+	objc_exchangeInstanceMethodImplementations("ReederMacAppDelegate", @selector(readerDidSync:), @selector(growl_reeder_readerDidSync:));
 
 	[GrowlApplicationBridge setGrowlDelegate:[self sharedInstance]];
 
@@ -49,7 +46,7 @@
 }
 
 #pragma mark -
-#pragma mark Utilities
+#pragma mark Helpers
 
 - (NSImage *)displayIconForFeedId:(NSString *)feedId {
 	Class readerUserMetaClass = objc_getClass("ReaderUser");
@@ -75,32 +72,8 @@
 							   clickContext:nil];
 }
 
-- (void)growlItems {
-	int i, count = [items count];
-	for(i = 0; i < count && i < MAX_NOTIFICATIONS_AT_ONCE; i++) {
-		NSDictionary *item = [items objectAtIndex:i];
-
-		NSDictionary *origin = [item valueForKey:@"origin"];
-		NSData *iconData = nil;
-		NSImage *icon = [self displayIconForFeedId:[origin valueForKey:@"streamId"]];
-		if(icon) {
-			iconData = [NSData dataWithData:[icon TIFFRepresentation]];
-		}
-
-		[self growl:[item valueForKey:@"title"] withTitle:[origin valueForKey:@"title"] withIconData:iconData];
-	}
-
-	int remains = count - i;
-	if(remains > 0) {
-		[self growl:[NSString stringWithFormat:@"And %d articles", remains] withTitle:@"Reeder" withIconData:nil];
-	}
-
-	[items removeAllObjects];
-}
-
-- (void)addReederItem:(NSDictionary *)item {
-	[items addObject:item];
-}
+#pragma mark -
+#pragma mark Interfaces for Reeder
 
 - (void)fetchedReederItem:(NSDictionary *)item {
 	NSArray *categories = [item valueForKey:@"categories"];
@@ -116,8 +89,31 @@
 	}
 
 	if(! read) {
-		[self addReederItem:item];
+		[items addObject:item];
 	}
+}
+
+- (void)growlItems {
+	int i, count = [items count];
+	for(i = 0; i < count && i < MAX_NOTIFICATIONS_AT_ONCE; i++) {
+		NSDictionary *item = [items objectAtIndex:i];
+		
+		NSDictionary *origin = [item valueForKey:@"origin"];
+		NSData *iconData = nil;
+		NSImage *icon = [self displayIconForFeedId:[origin valueForKey:@"streamId"]];
+		if(icon) {
+			iconData = [NSData dataWithData:[icon TIFFRepresentation]];
+		}
+		
+		[self growl:[item valueForKey:@"title"] withTitle:[origin valueForKey:@"title"] withIconData:iconData];
+	}
+	
+	int remains = count - i;
+	if(remains > 0) {
+		[self growl:[NSString stringWithFormat:@"And %d articles", remains] withTitle:@"Reeder" withIconData:nil];
+	}
+	
+	[items removeAllObjects];
 }
 
 #pragma mark -
@@ -146,10 +142,14 @@
 	[self growl_reeder_item:item];
 }
 
+#pragma mark -
+#pragma mark ReederMacAppDelegate
+
 - (void)growl_reeder_readerDidSync:(NSNotification *)notification {
 #ifdef DEBUG
 	NSLog(@"GrowlReeder: -growl_reeder_readerDidSync:%@", notification);
 #endif
+
 	if([[notification name] isEqualToString:@"ReaderDidSync"]) {
 		[[GrowlReeder sharedInstance] growlItems];
 	}
