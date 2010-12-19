@@ -134,10 +134,6 @@ void objc_exchangeInstanceMethodImplementations(const char* className, SEL origi
 #pragma mark ReaderFetchItems
 
 - (void)growl_reeder_item:(id)item {
-#ifdef DEBUG
-	NSLog(@"GrowlReeder: -growl_reeder_item:%@", item);
-#endif
-
 	[[GrowlReeder sharedInstance] fetchedReederItem:item];
 	[self growl_reeder_item:item];
 }
