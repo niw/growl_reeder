@@ -26,11 +26,11 @@
 	<array>
 		<dict>
 			<key>BundleIdentifier</key>
-			<string>com.reederapp.mac.Reeder</string>
+			<string>com.reederapp.mac</string>
 			<key>MaxBundleVersion</key>
-			<string>1000.02.06</string>
+			<string>1000.02.14</string>
 			<key>MinBundleVersion</key>
-			<string>1000.02.01</string>
+			<string>1000.02.14</string>
 		</dict>
 	</array>
 </dict>

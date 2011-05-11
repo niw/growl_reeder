@@ -14,7 +14,7 @@ void objc_exchangeInstanceMethodImplementations(const char* className, SEL origi
 @implementation GrowlReeder
 + (void)load {
 	objc_exchangeInstanceMethodImplementations("ReaderFetchItems", @selector(item:), @selector(growl_reeder_item:));
-	objc_exchangeInstanceMethodImplementations("ReederMacAppDelegate", @selector(readerDidSync:), @selector(growl_reeder_readerDidSync:));
+	objc_exchangeInstanceMethodImplementations("SubscriptionsViewController", @selector(readerDidSync:), @selector(growl_reeder_readerDidSync:));
 
 	[GrowlApplicationBridge setGrowlDelegate:[self sharedInstance]];
 
