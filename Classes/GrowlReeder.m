@@ -1,5 +1,5 @@
 #import "GrowlReeder.h"
-#import <objc/runtime.h>
+#import <objc/message.h>
 
 #define NEW_ARTICLE_NOTIFICATION_NAME @"New Article"
 #define MAX_NOTIFICATIONS_AT_ONCE 7
